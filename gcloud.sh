@@ -141,8 +141,11 @@ function gssh-save-config()
     # concurrently gather a list of each project's hosts...
     (
         for i in "${!pjs[@]}"; do
-            gci --project="${pjs[$i]}" --format="csv[no-heading](name,zone,${_GCI_ADDRS_FMT})" \
-                > "${tfs[$i]}" &
+            pj="${pjs[$i]}"
+            pjfname="GSSH_FILTER_$(varfrom "${pj}")"
+            args=(--project="${pj}" --format="csv[no-heading](name,zone,${_GCI_ADDRS_FMT})")
+            [[ -z "${!pjfname}" ]] || args+=(--filter="name ~ ${!pjfname}")
+            gci "${args[@]}" > "${tfs[$i]}" &
         done
         wait
     )
